@@ -1,6 +1,9 @@
+/* Light Mode */
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
+  background-color: #ffffff;
+  color: #333;
 }
 
 input,
@@ -29,6 +32,7 @@ li {
 li.completed {
   position: relative;
   overflow: hidden;
+  background-color: #d3ffd3;
 }
 
 li.completed::before {
@@ -40,7 +44,7 @@ li.completed::before {
   width: 0%;
   background: #d3ffd3;
   z-index: 0;
-  animation: peinture 0.5s forwards;
+  animation: paint 0.5s forwards;
 }
 
 li span {
@@ -48,7 +52,7 @@ li span {
   z-index: 1;
 }
 
-@keyframes peinture {
+@keyframes paint {
   to {
     width: 100%;
   }
@@ -68,7 +72,7 @@ button {
   margin-right: 5px;
 }
 
-.corbeille li {
+.trash li {
   background-color: #ffe0e0;
 }
 
@@ -101,4 +105,45 @@ li.explode {
 .tete-de-mort {
   animation: skullFadeIn 0.6s ease;
   font-size: 2rem;
+}
+
+/* Night Mode */
+body.night {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+ul li.night {
+  background-color: #333;
+  color: #f0f0f0;
+}
+
+button.night {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+button.night:hover {
+  background-color: #ddd;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.trash li.night {
+  background-color: #f8d7da;
+}
+
+li.completed.night {
+  background-color: #444;
+}
+
+li.completed.night::before {
+  background: #444;
 }

@@ -1,169 +1,180 @@
-const STORAGE_KEY = "mesTaches";
-const CORBEILLE_KEY = "tachesSupprimees";
+const STORAGE_KEY = "myTasks";
+const TRASH_KEY = "deletedTasks";
+const MODE_KEY = "nightMode";
 
-let taches = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let corbeille = JSON.parse(localStorage.getItem(CORBEILLE_KEY)) || [];
-let filtreActuel = "toutes";
+let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let trash = JSON.parse(localStorage.getItem(TRASH_KEY)) || [];
+let currentFilter = "all";
 
-function sauvegarderTaches() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(taches));
+const isNightMode = localStorage.getItem(MODE_KEY) === "true";
+if (isNightMode) {
+  document.body.classList.add("night");
 }
 
-function sauvegarderCorbeille() {
-  localStorage.setItem(CORBEILLE_KEY, JSON.stringify(corbeille));
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-function afficherTaches() {
-  const ul = document.getElementById("taskList");
+function saveTrash() {
+  localStorage.setItem(TRASH_KEY, JSON.stringify(trash));
+}
+
+function toggleMode() {
+  document.body.classList.toggle("night");
+  const isNowNight = document.body.classList.contains("night");
+  localStorage.setItem(MODE_KEY, isNowNight ? "true" : "false");
+  displayTasks();
+  displayTrash();
+}
+
+function displayTasks() {
+  const ul = document.getElementById('taskList');
   ul.innerHTML = "";
 
-  let tachesFiltrees = taches;
-  if (filtreActuel === "faites") tachesFiltrees = taches.filter(t => t.fait);
-  else if (filtreActuel === "afaire") tachesFiltrees = taches.filter(t => !t.fait);
+  let filteredTasks = tasks;
+  if (currentFilter === "completed") filteredTasks = tasks.filter(t => t.completed);
+  else if (currentFilter === "pending") filteredTasks = tasks.filter(t => !t.completed);
 
-  tachesFiltrees.forEach((tache, index) => {
-    const li = document.createElement("li");
+  filteredTasks.forEach((task, index) => {
+    const li = document.createElement('li');
     li.setAttribute("draggable", "true");
-    if (tache.fait) li.classList.add("completed");
+    li.classList.toggle("completed", task.completed);
+    if (document.body.classList.contains("night")) li.classList.add("night");
 
     li.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", index);
     });
 
-    const nomSpan = document.createElement("span");
-    nomSpan.textContent = tache.nom;
-    li.appendChild(nomSpan);
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = task.name;
+    li.appendChild(nameSpan);
 
-    const spanDate = document.createElement("span");
-    spanDate.className = "date";
-    spanDate.textContent = ` (Ajoutée le ${new Date(tache.date).toLocaleDateString()})`;
+    const spanDate = document.createElement('span');
+    spanDate.className = 'date';
+    spanDate.textContent = ` (Added on ${new Date(task.date).toLocaleDateString()})`;
     li.appendChild(spanDate);
 
     li.onclick = () => {
-      taches[index].fait = !taches[index].fait;
-      sauvegarderTaches();
-      afficherTaches();
+      tasks[index].completed = !tasks[index].completed;
+      saveTasks();
+      displayTasks();
     };
 
-    const btnEdit = document.createElement("button");
+    const btnEdit = document.createElement('button');
     btnEdit.textContent = "✏️";
     btnEdit.onclick = (e) => {
       e.stopPropagation();
-      const nouveauNom = prompt("Modifier la tâche :", tache.nom);
-      if (nouveauNom !== null && nouveauNom.trim() !== "") {
-        taches[index].nom = nouveauNom.trim();
-        sauvegarderTaches();
-        afficherTaches();
+      const newName = prompt("Edit task:", task.name);
+      if (newName !== null && newName.trim() !== "") {
+        tasks[index].name = newName.trim();
+        saveTasks();
+        displayTasks();
       }
     };
 
-    const btnSuppr = document.createElement("button");
-    btnSuppr.textContent = "❌";
-    btnSuppr.onclick = (e) => {
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = "❌";
+    btnDelete.onclick = (e) => {
       e.stopPropagation();
       li.classList.add("explode");
 
       setTimeout(() => {
-        ajouterALaCorbeille(taches[index]);
-        taches.splice(index, 1);
-        sauvegarderTaches();
-        afficherTaches();
-        afficherCorbeille();
+        addToTrash(tasks[index]);
+        tasks.splice(index, 1);
+        saveTasks();
+        displayTasks();
+        displayTrash();
       }, 600);
     };
 
     li.appendChild(btnEdit);
-    li.appendChild(btnSuppr);
+    li.appendChild(btnDelete);
     ul.appendChild(li);
   });
 }
 
-function ajouterTache() {
-  const input = document.getElementById("taskInput");
-  const nom = input.value.trim();
-  if (nom === "") return;
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const name = input.value.trim();
+  if (name === "") return;
 
-  taches.push({
-    nom: nom,
-    fait: false,
-    date: new Date().toISOString()
-  });
-
+  tasks.push({ name: name, completed: false, date: new Date().toISOString() });
   input.value = "";
-  sauvegarderTaches();
-  afficherTaches();
+  saveTasks();
+  displayTasks();
 }
 
-function ajouterALaCorbeille(tache) {
-  corbeille.unshift(tache);
-  if (corbeille.length > 5) corbeille.pop();
-  sauvegarderCorbeille();
+function addToTrash(task) {
+  trash.unshift(task);
+  if (trash.length > 5) trash.pop();
+  saveTrash();
 }
 
-function afficherCorbeille() {
-  const ul = document.getElementById("corbeilleList");
+function displayTrash() {
+  const ul = document.getElementById('trashList');
   ul.innerHTML = "";
 
-  corbeille.forEach((tache, index) => {
-    const li = document.createElement("li");
-    li.textContent = tache.nom;
+  trash.forEach((task, index) => {
+    const li = document.createElement('li');
+    li.textContent = task.name;
+    if (document.body.classList.contains("night")) li.classList.add("night");
 
-    const btnRestaurer = document.createElement("button");
-    btnRestaurer.textContent = "🔁 Restaurer";
-    btnRestaurer.onclick = () => {
-      taches.push(tache);
-      corbeille.splice(index, 1);
-      sauvegarderTaches();
-      sauvegarderCorbeille();
-      afficherTaches();
-      afficherCorbeille();
+    const btnRestore = document.createElement('button');
+    btnRestore.textContent = "🔁 Restore";
+    btnRestore.onclick = () => {
+      tasks.push(task);
+      trash.splice(index, 1);
+      saveTasks();
+      saveTrash();
+      displayTasks();
+      displayTrash();
     };
 
-    const btnSupprDef = document.createElement("button");
-    btnSupprDef.textContent = "❌ Supprimer définitivement";
-    btnSupprDef.onclick = () => {
-      if (confirm("Supprimer cette tâche définitivement ?")) {
-        const teteDeMort = document.createElement("span");
-        teteDeMort.textContent = "💀";
-        teteDeMort.classList.add("tete-de-mort");
-        li.appendChild(teteDeMort);
+    const btnDeleteForever = document.createElement('button');
+    btnDeleteForever.textContent = "❌ Delete Forever";
+    btnDeleteForever.onclick = () => {
+      if (confirm("Are you sure you want to permanently delete this task?")) {
+        const skull = document.createElement("span");
+        skull.textContent = "💀";
+        skull.classList.add("tete-de-mort");
+        li.appendChild(skull);
 
         setTimeout(() => {
-          corbeille.splice(index, 1);
-          sauvegarderCorbeille();
-          afficherCorbeille();
+          trash.splice(index, 1);
+          saveTrash();
+          displayTrash();
         }, 1000);
       }
     };
 
-    li.appendChild(btnRestaurer);
-    li.appendChild(btnSupprDef);
+    li.appendChild(btnRestore);
+    li.appendChild(btnDeleteForever);
     ul.appendChild(li);
   });
 }
 
-function supprimerToutesLesTaches() {
-  if (confirm("Es-tu sûr de vouloir tout supprimer ?")) {
-    taches.forEach(t => ajouterALaCorbeille(t));
-    taches = [];
-    sauvegarderTaches();
-    afficherTaches();
-    afficherCorbeille();
+function deleteAllTasks() {
+  if (confirm("Are you sure you want to delete all tasks?")) {
+    tasks.forEach(t => addToTrash(t));
+    tasks = [];
+    saveTasks();
+    displayTasks();
+    displayTrash();
   }
 }
 
-function changerFiltre(nouveauFiltre) {
-  filtreActuel = nouveauFiltre;
-  afficherTaches();
+function changeFilter(newFilter) {
+  currentFilter = newFilter;
+  displayTasks();
 }
 
-// Démarrage
+// Enable drag & drop ordering
 document.addEventListener("DOMContentLoaded", () => {
-  afficherTaches();
-  afficherCorbeille();
+  displayTasks();
+  displayTrash();
 
-  // Gestion du drag & drop (ordre)
   const list = document.getElementById("taskList");
+
   list.addEventListener("dragover", (e) => e.preventDefault());
 
   list.addEventListener("drop", (e) => {
@@ -173,10 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetIndex = allLis.indexOf(target);
 
     if (target && draggedIndex !== "" && draggedIndex != targetIndex) {
-      const [draggedItem] = taches.splice(draggedIndex, 1);
-      taches.splice(targetIndex, 0, draggedItem);
-      sauvegarderTaches();
-      afficherTaches();
+      const [draggedItem] = tasks.splice(draggedIndex, 1);
+      tasks.splice(targetIndex, 0, draggedItem);
+      saveTasks();
+      displayTasks();
     }
   });
 });

@@ -1,28 +1,31 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Gestionnaire de Tâches Animé</title>
+  <title>Task Manager</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>📋 Ma Liste de Tâches</h1>
+  <h1>📋 My Task List</h1>
 
-  <input type="text" id="taskInput" placeholder="Ajouter une tâche" />
-  <button onclick="ajouterTache()">Ajouter</button>
-  <button onclick="supprimerToutesLesTaches()">🧹 Tout supprimer</button>
+  <!-- Button to toggle between light and dark mode -->
+  <button onclick="toggleMode()">🌙 / 🌞 Toggle Night Mode</button>
 
-  <div class="filtre-btns">
-    <p>🔍 Filtrer :</p>
-    <button onclick="changerFiltre('toutes')">Toutes</button>
-    <button onclick="changerFiltre('afaire')">À faire</button>
-    <button onclick="changerFiltre('faites')">Faites</button>
+  <input type="text" id="taskInput" placeholder="Add a task" />
+  <button onclick="addTask()">Add</button>
+  <button onclick="deleteAllTasks()">🧹 Delete All</button>
+
+  <div class="filter-btns">
+    <p>🔍 Filter:</p>
+    <button onclick="changeFilter('all')">All</button>
+    <button onclick="changeFilter('pending')">Pending</button>
+    <button onclick="changeFilter('completed')">Completed</button>
   </div>
 
   <ul id="taskList"></ul>
 
-  <h2 class="corbeille">🗑️ Corbeille (5 dernières)</h2>
-  <ul id="corbeilleList"></ul>
+  <h2 class="trash">🗑️ Trash (5 most recent)</h2>
+  <ul id="trashList"></ul>
 
   <script src="script.js"></script>
 </body>

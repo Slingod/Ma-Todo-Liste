@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestionnaire de Tâches Animé</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>📋 Ma Liste de Tâches</h1>
+
+  <input type="text" id="taskInput" placeholder="Ajouter une tâche" />
+  <button onclick="ajouterTache()">Ajouter</button>
+  <button onclick="supprimerToutesLesTaches()">🧹 Tout supprimer</button>
+
+  <div class="filtre-btns">
+    <p>🔍 Filtrer :</p>
+    <button onclick="changerFiltre('toutes')">Toutes</button>
+    <button onclick="changerFiltre('afaire')">À faire</button>
+    <button onclick="changerFiltre('faites')">Faites</button>
+  </div>
+
+  <ul id="taskList"></ul>
+
+  <h2 class="corbeille">🗑️ Corbeille (5 dernières)</h2>
+  <ul id="corbeilleList"></ul>
+
+  <script src="script.js"></script>
+</body>
+</html>
